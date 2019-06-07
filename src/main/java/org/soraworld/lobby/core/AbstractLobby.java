@@ -57,7 +57,7 @@ public abstract class AbstractLobby {
 
     /**
      * 获取传送映射信息.
-     * 大厅集会点 -> 游戏传送点
+     * 大厅集会点 -&gt; 游戏传送点
      * 此方法应该只读，不得进行添加删除操作!
      * **** 务必返回非空映射 ****
      *
@@ -67,7 +67,7 @@ public abstract class AbstractLobby {
 
     /**
      * 是否开始游戏.
-     * 若开始,则传送玩家到{@link AbstractLobby#getTransfer();}设定的目标位置
+     * 若开始,则传送玩家到 {@link AbstractLobby#getTransfer} 设定的目标位置
      *
      * @param time     从大厅启动到当前的时间，单位 update
      * @param players  当前大厅玩家列表
@@ -78,7 +78,7 @@ public abstract class AbstractLobby {
 
     /**
      * 是否结束游戏.
-     * 若结束,则传送玩家到{@link AbstractLobby#getCenter();}设定的位置
+     * 若结束,则传送玩家到 {@link AbstractLobby#getCenter} 设定的位置
      *
      * @param time     从大厅启动到当前的时间，单位 update
      * @param players  当前游戏玩家列表
