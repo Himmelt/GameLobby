@@ -84,7 +84,6 @@ public class LobbyManager extends SpigotManager {
     public void tryJoinGame(Player player, String game) {
         UUID uuid = player.getUniqueId();
         String current = playerGames.get(uuid);
-        System.out.println(current);
         if (current != null && registerLobbies.containsKey(current)) {
             sendKey(player, "alreadyInGame", registerLobbies.get(current).display());
             return;
