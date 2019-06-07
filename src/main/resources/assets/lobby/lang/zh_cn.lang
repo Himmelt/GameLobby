@@ -1,0 +1,24 @@
+# 中文语言文件(Chinese Language File)
+# 请使用 UTF-8 编码
+
+chatHead = "[游戏大厅] "
+
+gameList = "已注册的游戏大厅有: %s."
+gameNotExist = "名为 %s 的游戏大厅不存在."
+gameAlreadyExist = "名为 %s 的游戏大厅已注册，不可重复注册!"
+gameRemoved = "名为 %s 的游戏大厅已取消注册!"
+openLobby = "已开启 %s 游戏大厅."
+cantOpenLobby = "游戏 %s 处于 %s 状态，无法完成操作."
+closeLobby = "已关闭 %s 游戏大厅."
+stateCantClose = "游戏 %s 处于 %s 状态，无法完成操作."
+forceFinish = "已强制关闭 %s 游戏大厅."
+gameNotStart = "游戏 %s 未开始，无法完成操作."
+alreadyInGame = "你已加入 %s 游戏大厅."
+lobbyNotOpen = "游戏大厅 %s 尚未开启."
+gameStarted = "游戏 %s 已开始，不能加入大厅."
+gameRejectJoin = "游戏大厅 %s 拒绝你的加入."
+quitGame = "你已退出 %s 游戏."
+gameRejectQuit = "游戏大厅 %s 拒绝你退出游戏."
+notJoinAnyGame = "你尚未加入任何游戏大厅."
+
+comment.updateFrequency = "大厅检测频率(单位: tick)"
