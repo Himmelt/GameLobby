@@ -3,6 +3,7 @@ package org.soraworld.lobby.core;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.soraworld.lobby.GameLobby;
 import org.soraworld.lobby.manager.LobbyManager;
 
 import java.util.*;
@@ -14,18 +15,9 @@ public abstract class AbstractLobby {
 
     private long life = 0;
     private GameState state = GameState.CLOSE;
-    private final LobbyManager manager;
+    private final LobbyManager manager = GameLobby.getLobbyManager();
     private final ArrayList<Player> players = new ArrayList<>();
     private final HashMap<Location, List<Player>> factions = new HashMap<>();
-
-    /**
-     * 游戏大厅构造器.
-     *
-     * @param manager 管理器
-     */
-    public AbstractLobby(LobbyManager manager) {
-        this.manager = manager;
-    }
 
     /**
      * 游戏大厅显示名.

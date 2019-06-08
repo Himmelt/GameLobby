@@ -48,6 +48,26 @@ public class LobbyManager extends SpigotManager {
     }
 
     /**
+     * 是否已注册游戏大厅.
+     *
+     * @param name 名称
+     * @return 是否已注册
+     */
+    public boolean isRegistered(String name) {
+        return registerLobbies.containsKey(name);
+    }
+
+    /**
+     * 获取已注册游戏大厅.
+     *
+     * @param name 名称
+     * @return 游戏大厅
+     */
+    public AbstractLobby getRegisterLobby(String name) {
+        return registerLobbies.get(name);
+    }
+
+    /**
      * 取消注册游戏大厅.
      *
      * @param name 名称
@@ -138,7 +158,7 @@ public class LobbyManager extends SpigotManager {
     @Override
     public void afterLoad() {
         if (!registerLobbies.containsKey("example")) {
-            registerGameLobby("example", new ExampleLobby(this, new Location(Bukkit.getWorlds().get(0), 0, 100, 0)));
+            registerGameLobby("example", new ExampleLobby(new Location(Bukkit.getWorlds().get(0), 0, 100, 0)));
         }
         if (task != null) task.cancel();
         task = Bukkit.getScheduler().runTaskTimer(plugin,

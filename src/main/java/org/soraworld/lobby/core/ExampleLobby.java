@@ -3,7 +3,6 @@ package org.soraworld.lobby.core;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.soraworld.lobby.manager.LobbyManager;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,8 +13,7 @@ public final class ExampleLobby extends AbstractLobby {
     private final Location center;
     private final HashMap<Location, Location> transfer = new HashMap<>();
 
-    public ExampleLobby(LobbyManager manager, Location center) {
-        super(manager);
+    public ExampleLobby(Location center) {
         this.center = center;
         Location loc1_1 = center.clone().add(5, 0, 0);
         Location loc1_2 = center.clone().add(5, 10, 0);
