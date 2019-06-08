@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,10 @@ public final class ExampleLobby extends AbstractLobby {
         return transfer;
     }
 
+    public boolean shouldOpen() {
+        return Calendar.getInstance().get(Calendar.HOUR_OF_DAY) == 14;
+    }
+
     public boolean shouldStart(long time, List<Player> players, Map<Location, List<Player>> factions) {
         return time >= 400;
     }
@@ -61,15 +66,15 @@ public final class ExampleLobby extends AbstractLobby {
         return time >= 2000;
     }
 
-    public boolean allowJoin(Player player) {
+    public boolean onPlayerJoin(Player player) {
         return true;
     }
 
-    public boolean allowStart(Player player) {
+    public boolean onPlayerStart(Player player) {
         return true;
     }
 
-    public boolean allowQuit(Player player) {
+    public boolean onPlayerQuit(Player player) {
         return getState() != GameState.START;
     }
 

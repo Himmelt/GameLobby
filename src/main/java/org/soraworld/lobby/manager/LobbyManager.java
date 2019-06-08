@@ -113,7 +113,7 @@ public class LobbyManager extends SpigotManager {
             switch (lobby.getState()) {
                 case OPEN:
                 case FINISH:
-                    if (lobby.allowJoin(player)) {
+                    if (lobby.onPlayerJoin(player)) {
                         playerGames.put(uuid, game);
                         player.teleport(lobby.getCenter());
                     } else sendKey(player, "gameRejectJoin", lobby.display());
@@ -139,7 +139,7 @@ public class LobbyManager extends SpigotManager {
         if (current != null) {
             AbstractLobby lobby = registerLobbies.get(current);
             if (lobby != null) {
-                if (lobby.allowQuit(player)) {
+                if (lobby.onPlayerQuit(player)) {
                     playerGames.remove(uuid);
                     sendKey(player, "quitGame", lobby.display());
                 } else sendKey(player, "gameRejectQuit", lobby.display());

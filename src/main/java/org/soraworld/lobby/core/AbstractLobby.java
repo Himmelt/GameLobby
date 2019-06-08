@@ -58,6 +58,16 @@ public abstract class AbstractLobby {
     public abstract Map<Location, Location> getTransfer();
 
     /**
+     * 是否开启大厅.
+     * 这里可以根据游戏时间，或系统时间，定时或周期性开启。
+     * 比如每天晚上 8 点开启。
+     * 游戏必须处于 {@link GameState#CLOSE} 或 {@link GameState#FINISH} 状态.
+     *
+     * @return 是否开启大厅
+     */
+    public abstract boolean shouldOpen();
+
+    /**
      * 是否开始游戏.
      * 若开始,则传送玩家到 {@link AbstractLobby#getTransfer} 设定的目标位置
      *
@@ -89,28 +99,31 @@ public abstract class AbstractLobby {
     public abstract boolean shouldClose(long time);
 
     /**
-     * 是否允许加入大厅.
+     * 当玩家尝试加入大厅时.
+     * 如果返回 false 则拒绝玩家加入.
      *
      * @param player 玩家
      * @return 是否允许加入 boolean
      */
-    public abstract boolean allowJoin(Player player);
+    public abstract boolean onPlayerJoin(Player player);
 
     /**
-     * 是否允许开始游戏.
+     * 当玩家尝试被传送游戏传送点时.
+     * 如果返回 false 则拒绝玩家传送.
      *
      * @param player 玩家
      * @return 是否允许开始 boolean
      */
-    public abstract boolean allowStart(Player player);
+    public abstract boolean onPlayerStart(Player player);
 
     /**
-     * 是否允许退出游戏.
+     * 当玩家主动退出时.
+     * 如果返回 false 则拒绝玩家退出.
      *
      * @param player 玩家
      * @return 是否允许退出 boolean
      */
-    public abstract boolean allowQuit(Player player);
+    public abstract boolean onPlayerQuit(Player player);
 
     /**
      * 大厅开启时.
@@ -179,6 +192,7 @@ public abstract class AbstractLobby {
      * 游戏周期更新.
      */
     public final void update() {
+        if (shouldOpen()) openLobby(null);
         if (state != GameState.CLOSE) {
             life += manager.updateFrequency();
             if (state == GameState.OPEN) {
@@ -190,7 +204,7 @@ public abstract class AbstractLobby {
                     factions.forEach((fac, players) -> {
                         Location target = transfer.get(fac);
                         players.forEach(player -> {
-                            if (allowStart(player)) player.teleport(target);
+                            if (onPlayerStart(player)) player.teleport(target);
                         });
                     });
                 }
@@ -208,7 +222,7 @@ public abstract class AbstractLobby {
     /**
      * (强制)结束游戏，并传送所有玩家回大厅中心.
      */
-    public void finishGame() {
+    public final void finishGame() {
         onFinish();
         players.forEach(player -> {
             manager.clearGame(player);
@@ -286,7 +300,7 @@ public abstract class AbstractLobby {
      *
      * @return 开启时长
      */
-    public long getLife() {
+    public final long getLife() {
         return life;
     }
 
