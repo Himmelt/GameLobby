@@ -13,7 +13,8 @@ import java.util.*;
  */
 public abstract class AbstractLobby {
 
-    private long life = 0;
+    private long gameLife = 0;
+    private long lobbyLife = 0;
     private GameState state = GameState.CLOSE;
     private final LobbyManager manager = GameLobby.getLobbyManager();
     private final ArrayList<Player> players = new ArrayList<>();
@@ -71,23 +72,24 @@ public abstract class AbstractLobby {
      * 是否开始游戏.
      * 若开始,则传送玩家到 {@link AbstractLobby#getTransfer} 设定的目标位置
      *
-     * @param time     从大厅启动到当前的时间，单位 update
-     * @param players  当前大厅玩家列表
-     * @param factions 每个阵营的玩家列表
+     * @param lobbyLife 从大厅启动到当前的时间，单位 tick
+     * @param players   当前大厅玩家列表
+     * @param factions  每个阵营的玩家列表
      * @return 是否开始传送 boolean
      */
-    public abstract boolean shouldStart(long time, final List<Player> players, final Map<Location, List<Player>> factions);
+    public abstract boolean shouldStart(long lobbyLife, final List<Player> players, final Map<Location, List<Player>> factions);
 
     /**
      * 是否结束游戏.
      * 若结束,则传送玩家到 {@link AbstractLobby#getCenter} 设定的位置
      *
-     * @param time     从大厅启动到当前的时间，单位 update
-     * @param players  当前游戏玩家列表
-     * @param factions 每个阵营的玩家列表
+     * @param lobbyLife 从大厅启动到当前的时间，单位 tick
+     * @param gameLife  游戏开始至此刻的时间
+     * @param players   当前游戏玩家列表
+     * @param factions  每个阵营的玩家列表
      * @return 是否开始传送 boolean
      */
-    public abstract boolean shouldFinish(long time, final List<Player> players, final Map<Location, List<Player>> factions);
+    public abstract boolean shouldFinish(long lobbyLife, long gameLife, final List<Player> players, final Map<Location, List<Player>> factions);
 
     /**
      * 是否关闭游戏大厅.
@@ -109,12 +111,13 @@ public abstract class AbstractLobby {
 
     /**
      * 当玩家尝试被传送游戏传送点时.
-     * 如果返回 false 则拒绝玩家传送.
+     * 如果返回 null 则拒绝玩家传送.
      *
      * @param player 玩家
-     * @return 是否允许开始 boolean
+     * @param origin 原始传送位置
+     * @return 最终传送位置
      */
-    public abstract boolean onPlayerStart(Player player);
+    public abstract Location onPlayerStart(Player player, Location origin);
 
     /**
      * 当玩家主动退出时.
@@ -138,9 +141,10 @@ public abstract class AbstractLobby {
     /**
      * 游戏周期更新时.
      *
-     * @param time 大厅开启至今的时长(单位: tick)
+     * @param lobbyLife 大厅开启至今的时长(单位: tick)
+     * @param gameLife  游戏开始至此刻的时间
      */
-    public abstract void onUpdate(long time);
+    public abstract void onUpdate(long lobbyLife, long gameLife);
 
     /**
      * 游戏结束时.
@@ -153,6 +157,13 @@ public abstract class AbstractLobby {
     public abstract void onClose();
 
     /**
+     * 在玩家死亡时.
+     *
+     * @param player 玩家
+     */
+    public abstract void onPlayerDeath(Player player);
+
+    /**
      * 开启游戏大厅.
      *
      * @param sender the sender
@@ -160,7 +171,8 @@ public abstract class AbstractLobby {
     public final void openLobby(CommandSender sender) {
         if (state.canOpen()) {
             onOpen();
-            life = 0;
+            lobbyLife = 0;
+            gameLife = 0;
             state = GameState.OPEN;
             if (sender != null) manager.sendKey(sender, "openLobby", display());
         } else if (sender != null) {
@@ -194,26 +206,28 @@ public abstract class AbstractLobby {
     public final void update() {
         if (shouldOpen()) openLobby(null);
         if (state != GameState.CLOSE) {
-            life += manager.updateFrequency();
+            lobbyLife += manager.updateFrequency();
             if (state == GameState.OPEN) {
                 checkLobby();
-                if (shouldStart(life, players, factions)) {
+                if (shouldStart(lobbyLife, players, factions)) {
                     onStart();
                     state = GameState.START;
                     Map<Location, Location> transfer = getTransfer();
                     factions.forEach((fac, players) -> {
                         Location target = transfer.get(fac);
                         players.forEach(player -> {
-                            if (onPlayerStart(player)) player.teleport(target);
+                            Location loc = onPlayerStart(player, target);
+                            if (loc != null) player.teleport(loc);
                         });
                     });
                 }
             }
-            onUpdate(life);
-            if (state.canFinish() && shouldFinish(life, players, factions)) {
+            if (state == GameState.START) gameLife += manager.updateFrequency();
+            onUpdate(lobbyLife, gameLife);
+            if (state.canFinish() && shouldFinish(lobbyLife, gameLife, players, factions)) {
                 finishGame();
             }
-            if (state.canClose() && shouldClose(life)) {
+            if (state.canClose() && shouldClose(lobbyLife)) {
                 closeLobby(null);
             }
         }
@@ -300,8 +314,37 @@ public abstract class AbstractLobby {
      *
      * @return 开启时长
      */
-    public final long getLife() {
-        return life;
+    public final long getLobbyLife() {
+        return lobbyLife;
+    }
+
+    /**
+     * 获取游戏开始至此刻的时间.
+     *
+     * @return 游戏开始时长
+     */
+    public final long getGameLife() {
+        return gameLife;
+    }
+
+    /**
+     * 踢出玩家.
+     *
+     * @param player 玩家
+     */
+    public final void kickPlayer(Player player) {
+        players.remove(player);
+        factions.forEach((location, ps) -> ps.remove(player));
+        manager.clearGame(player);
+    }
+
+    /**
+     * 传送玩家到游戏大厅.
+     *
+     * @param player 目标玩家
+     */
+    public final void tpPlayerToLobby(Player player) {
+        player.teleport(getCenter());
     }
 
     private static Location getNearestLoc(Collection<Location> locations, Location source) {

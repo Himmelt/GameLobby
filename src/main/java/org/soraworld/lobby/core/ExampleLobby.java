@@ -54,12 +54,12 @@ public final class ExampleLobby extends AbstractLobby {
         return Calendar.getInstance().get(Calendar.HOUR_OF_DAY) == 14;
     }
 
-    public boolean shouldStart(long time, List<Player> players, Map<Location, List<Player>> factions) {
-        return time >= 400;
+    public boolean shouldStart(long lobbyLife, List<Player> players, Map<Location, List<Player>> factions) {
+        return lobbyLife >= 400;
     }
 
-    public boolean shouldFinish(long time, List<Player> players, Map<Location, List<Player>> factions) {
-        return time >= 1000;
+    public boolean shouldFinish(long lobbyLife, long gameLife, List<Player> players, Map<Location, List<Player>> factions) {
+        return lobbyLife >= 1000 || gameLife >= 800;
     }
 
     public boolean shouldClose(long time) {
@@ -70,8 +70,8 @@ public final class ExampleLobby extends AbstractLobby {
         return true;
     }
 
-    public boolean onPlayerStart(Player player) {
-        return true;
+    public Location onPlayerStart(Player player, Location origin) {
+        return origin;
     }
 
     public boolean onPlayerQuit(Player player) {
@@ -86,8 +86,8 @@ public final class ExampleLobby extends AbstractLobby {
         Bukkit.broadcastMessage("Example Lobby Started !");
     }
 
-    public void onUpdate(long time) {
-        if (time % 100 == 0) Bukkit.broadcastMessage("Example Lobby has opened " + time + " ticks !");
+    public void onUpdate(long lobbyLife, long gameLife) {
+        if (lobbyLife % 100 == 0) Bukkit.broadcastMessage("Example Lobby has opened " + lobbyLife + " ticks !");
     }
 
     public void onFinish() {
@@ -96,5 +96,9 @@ public final class ExampleLobby extends AbstractLobby {
 
     public void onClose() {
         Bukkit.broadcastMessage("Example Lobby Closed !");
+    }
+
+    public void onPlayerDeath(Player player) {
+        kickPlayer(player);
     }
 }

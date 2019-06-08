@@ -77,6 +77,10 @@ public class LobbyManager extends SpigotManager {
         consoleKey("gameRemoved", name);
     }
 
+    public AbstractLobby getPlayerLobby(UUID uuid) {
+        return registerLobbies.get(playerGames.getOrDefault(uuid, ""));
+    }
+
     public void tryOpenGame(CommandSender sender, String name) {
         AbstractLobby lobby = registerLobbies.get(name);
         if (lobby != null) lobby.openLobby(sender);

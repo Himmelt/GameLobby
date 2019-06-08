@@ -3,6 +3,7 @@ package org.soraworld.lobby;
 import org.bukkit.event.Listener;
 import org.soraworld.lobby.command.CommandLobby;
 import org.soraworld.lobby.core.AbstractLobby;
+import org.soraworld.lobby.listener.EventListener;
 import org.soraworld.lobby.manager.LobbyManager;
 import org.soraworld.violet.command.SpigotBaseSubs;
 import org.soraworld.violet.command.SpigotCommand;
@@ -10,6 +11,7 @@ import org.soraworld.violet.manager.SpigotManager;
 import org.soraworld.violet.plugin.SpigotPlugin;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class GameLobby extends SpigotPlugin {
@@ -29,7 +31,9 @@ public final class GameLobby extends SpigotPlugin {
 
     @Override
     protected List<Listener> registerListeners() {
-        return null;
+        ArrayList<Listener> listeners = new ArrayList<>();
+        listeners.add(new EventListener(theManager));
+        return listeners;
     }
 
     @Override
