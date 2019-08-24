@@ -1,47 +1,19 @@
 package org.soraworld.lobby;
 
-import org.bukkit.event.Listener;
-import org.soraworld.lobby.command.CommandLobby;
 import org.soraworld.lobby.core.AbstractLobby;
-import org.soraworld.lobby.listener.EventListener;
 import org.soraworld.lobby.manager.LobbyManager;
-import org.soraworld.violet.command.SpigotBaseSubs;
-import org.soraworld.violet.command.SpigotCommand;
-import org.soraworld.violet.manager.SpigotManager;
+import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.plugin.SpigotPlugin;
 
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-
+@Inject
 public final class GameLobby extends SpigotPlugin {
 
+    @Inject
     private static LobbyManager theManager;
 
     @Override
     public String getId() {
         return "lobby";
-    }
-
-    @Override
-    protected SpigotManager registerManager(Path path) {
-        theManager = new LobbyManager(this, path);
-        return theManager;
-    }
-
-    @Override
-    protected List<Listener> registerListeners() {
-        ArrayList<Listener> listeners = new ArrayList<>();
-        listeners.add(new EventListener(theManager));
-        return listeners;
-    }
-
-    @Override
-    protected void registerCommands() {
-        SpigotCommand command = new SpigotCommand(getId(), null, false, theManager);
-        command.extractSub(SpigotBaseSubs.class);
-        command.extractSub(CommandLobby.class);
-        register(this, command);
     }
 
     /**
@@ -59,7 +31,7 @@ public final class GameLobby extends SpigotPlugin {
      * @param name  名称
      * @param lobby 大厅
      */
-    public void registerGameLobby(String name, AbstractLobby lobby) {
+    public static void registerGameLobby(String name, AbstractLobby lobby) {
         if (theManager != null) theManager.registerGameLobby(name, lobby);
     }
 
@@ -68,7 +40,7 @@ public final class GameLobby extends SpigotPlugin {
      *
      * @param name 名称
      */
-    public void unregisterGameLobby(String name) {
+    public static void unregisterGameLobby(String name) {
         if (theManager != null) theManager.unregisterGameLobby(name);
     }
 }

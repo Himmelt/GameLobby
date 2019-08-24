@@ -1,10 +1,10 @@
 name: GameLobby
-version: 1.0.0
+version: 1.1.0
 author: Himmelt
 main: org.soraworld.lobby.GameLobby
 depend: [Violet]
 website: https://github.com/Himmelt/GameLobby
 description: GameLobby Plugin.
 permissions:
-  gamelobby.admin:
+  lobby.admin:
     default: op

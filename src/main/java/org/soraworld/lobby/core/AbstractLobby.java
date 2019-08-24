@@ -3,22 +3,25 @@ package org.soraworld.lobby.core;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.soraworld.lobby.GameLobby;
 import org.soraworld.lobby.manager.LobbyManager;
+import org.soraworld.violet.inject.Inject;
 
 import java.util.*;
 
 /**
  * 游戏大厅接口.
  */
+@Inject
 public abstract class AbstractLobby {
 
     private long gameLife = 0;
     private long lobbyLife = 0;
     private GameState state = GameState.CLOSE;
-    private final LobbyManager manager = GameLobby.getLobbyManager();
     private final ArrayList<Player> players = new ArrayList<>();
     private final HashMap<Location, List<Player>> factions = new HashMap<>();
+
+    @Inject
+    private static LobbyManager manager;
 
     /**
      * 游戏大厅显示名.

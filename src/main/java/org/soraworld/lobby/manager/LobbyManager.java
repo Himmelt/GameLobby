@@ -9,7 +9,8 @@ import org.soraworld.hocon.node.Setting;
 import org.soraworld.lobby.core.AbstractLobby;
 import org.soraworld.lobby.core.ExampleLobby;
 import org.soraworld.lobby.core.GameState;
-import org.soraworld.violet.manager.SpigotManager;
+import org.soraworld.violet.inject.MainManager;
+import org.soraworld.violet.manager.VManager;
 import org.soraworld.violet.plugin.SpigotPlugin;
 import org.soraworld.violet.util.ChatColor;
 
@@ -18,7 +19,8 @@ import java.util.HashMap;
 import java.util.StringJoiner;
 import java.util.UUID;
 
-public class LobbyManager extends SpigotManager {
+@MainManager
+public class LobbyManager extends VManager {
 
     @Setting(comment = "comment.updateFrequency")
     private int updateFrequency = 20;

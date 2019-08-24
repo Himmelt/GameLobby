@@ -8,14 +8,14 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.soraworld.lobby.core.AbstractLobby;
 import org.soraworld.lobby.manager.LobbyManager;
+import org.soraworld.violet.inject.EventListener;
+import org.soraworld.violet.inject.Inject;
 
-public class EventListener implements Listener {
+@EventListener
+public class LobbyListener implements Listener {
 
-    private final LobbyManager manager;
-
-    public EventListener(LobbyManager manager) {
-        this.manager = manager;
-    }
+    @Inject
+    private LobbyManager manager;
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
