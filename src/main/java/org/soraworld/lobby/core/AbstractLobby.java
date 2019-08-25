@@ -1,8 +1,13 @@
 package org.soraworld.lobby.core;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginManager;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.soraworld.lobby.event.*;
 import org.soraworld.lobby.manager.LobbyManager;
 import org.soraworld.violet.inject.Inject;
 
@@ -17,6 +22,7 @@ public abstract class AbstractLobby {
     private long gameLife = 0;
     private long lobbyLife = 0;
     private GameState state = GameState.CLOSE;
+    private final PluginManager pluginManager = Bukkit.getPluginManager();
     private final ArrayList<Player> players = new ArrayList<>();
     private final HashMap<Location, List<Player>> factions = new HashMap<>();
 
@@ -28,6 +34,7 @@ public abstract class AbstractLobby {
      *
      * @return 显示名 string
      */
+    @NotNull
     public abstract String display();
 
     /**
@@ -49,6 +56,7 @@ public abstract class AbstractLobby {
      *
      * @return 大厅半径类型 r type
      */
+    @NotNull
     public abstract RType getRType();
 
     /**
@@ -59,6 +67,7 @@ public abstract class AbstractLobby {
      *
      * @return 传送映射信息 transfer
      */
+    @NotNull
     public abstract Map<Location, Location> getTransfer();
 
     /**
@@ -80,7 +89,7 @@ public abstract class AbstractLobby {
      * @param factions  每个阵营的玩家列表
      * @return 是否开始传送 boolean
      */
-    public abstract boolean shouldStart(long lobbyLife, final List<Player> players, final Map<Location, List<Player>> factions);
+    public abstract boolean shouldStart(long lobbyLife, @NotNull final List<Player> players, @NotNull final Map<Location, @NotNull List<Player>> factions);
 
     /**
      * 是否结束游戏.
@@ -92,7 +101,7 @@ public abstract class AbstractLobby {
      * @param factions  每个阵营的玩家列表
      * @return 是否开始传送 boolean
      */
-    public abstract boolean shouldFinish(long lobbyLife, long gameLife, final List<Player> players, final Map<Location, List<Player>> factions);
+    public abstract boolean shouldFinish(long lobbyLife, long gameLife, @NotNull final List<Player> players, @NotNull final Map<Location, List<Player>> factions);
 
     /**
      * 是否关闭游戏大厅.
@@ -110,7 +119,7 @@ public abstract class AbstractLobby {
      * @param player 玩家
      * @return 是否允许加入 boolean
      */
-    public abstract boolean onPlayerJoin(Player player);
+    public abstract boolean onPlayerJoin(@NotNull Player player);
 
     /**
      * 当玩家尝试被传送游戏传送点时.
@@ -120,7 +129,8 @@ public abstract class AbstractLobby {
      * @param origin 原始传送位置
      * @return 最终传送位置
      */
-    public abstract Location onPlayerStart(Player player, Location origin);
+    @Nullable
+    public abstract Location onPlayerStart(@NotNull Player player, @NotNull Location origin);
 
     /**
      * 当玩家主动退出时.
@@ -129,7 +139,7 @@ public abstract class AbstractLobby {
      * @param player 玩家
      * @return 是否允许退出 boolean
      */
-    public abstract boolean onPlayerQuit(Player player);
+    public abstract boolean onPlayerQuit(@NotNull Player player);
 
     /**
      * 大厅开启时.
@@ -164,15 +174,16 @@ public abstract class AbstractLobby {
      *
      * @param player 玩家
      */
-    public abstract void onPlayerDeath(Player player);
+    public abstract void onPlayerDeath(@NotNull Player player);
 
     /**
      * 开启游戏大厅.
      *
      * @param sender the sender
      */
-    public final void openLobby(CommandSender sender) {
+    public final void openLobby(@Nullable CommandSender sender) {
         if (state.canOpen()) {
+            pluginManager.callEvent(new LobbyOpenEvent(this));
             onOpen();
             lobbyLife = 0;
             gameLife = 0;
@@ -188,8 +199,9 @@ public abstract class AbstractLobby {
      *
      * @param sender the sender
      */
-    public final void closeLobby(CommandSender sender) {
+    public final void closeLobby(@Nullable CommandSender sender) {
         if (state.canClose()) {
+            pluginManager.callEvent(new LobbyCloseEvent(this));
             onClose();
             if (state != GameState.FINISH) {
                 players.forEach(manager::clearGame);
@@ -213,12 +225,13 @@ public abstract class AbstractLobby {
             if (state == GameState.OPEN) {
                 checkLobby();
                 if (shouldStart(lobbyLife, players, factions)) {
+                    pluginManager.callEvent(new LobbyStartEvent(this));
                     onStart();
                     state = GameState.START;
                     Map<Location, Location> transfer = getTransfer();
                     factions.forEach((fac, players) -> {
                         Location target = transfer.get(fac);
-                        players.forEach(player -> {
+                        if (target != null) players.forEach(player -> {
                             Location loc = onPlayerStart(player, target);
                             if (loc != null) player.teleport(loc);
                         });
@@ -226,6 +239,7 @@ public abstract class AbstractLobby {
                 }
             }
             if (state == GameState.START) gameLife += manager.updateFrequency();
+            pluginManager.callEvent(new LobbyUpdateEvent(this));
             onUpdate(lobbyLife, gameLife);
             if (state.canFinish() && shouldFinish(lobbyLife, gameLife, players, factions)) {
                 finishGame();
@@ -240,10 +254,12 @@ public abstract class AbstractLobby {
      * (强制)结束游戏，并传送所有玩家回大厅中心.
      */
     public final void finishGame() {
+        pluginManager.callEvent(new LobbyFinishEvent(this));
         onFinish();
-        players.forEach(player -> {
+        Location center = getCenter();
+        if (center != null) players.forEach(player -> {
             manager.clearGame(player);
-            player.teleport(getCenter());
+            player.teleport(center);
         });
         players.clear();
         factions.clear();
@@ -254,6 +270,7 @@ public abstract class AbstractLobby {
         players.clear();
         factions.clear();
         Location center = getCenter();
+        if (center == null) return;
         double cX = center.getX(), cY = center.getY(), cZ = center.getZ();
         int radius = getRadius();
         RType type = getRType();
@@ -335,7 +352,7 @@ public abstract class AbstractLobby {
      *
      * @param player 玩家
      */
-    public final void kickPlayer(Player player) {
+    public final void kickPlayer(@NotNull Player player) {
         players.remove(player);
         factions.forEach((location, ps) -> ps.remove(player));
         manager.clearGame(player);
@@ -346,11 +363,20 @@ public abstract class AbstractLobby {
      *
      * @param player 目标玩家
      */
-    public final void tpPlayerToLobby(Player player) {
-        player.teleport(getCenter());
+    public final void tpPlayerToLobby(@NotNull Player player) {
+        Location center = getCenter();
+        if (center != null) player.teleport(center);
     }
 
-    private static Location getNearestLoc(Collection<Location> locations, Location source) {
+    public final void broadcastKey(@NotNull String key, Object... args) {
+        players.forEach(player -> manager.sendKey(player, key, args));
+    }
+
+    public final void broadcast(@NotNull String message) {
+        players.forEach(player -> manager.send(player, message));
+    }
+
+    private static Location getNearestLoc(@NotNull Collection<Location> locations, @NotNull Location source) {
         double min = Double.MAX_VALUE;
         Location target = null;
         for (Location loc : locations) {

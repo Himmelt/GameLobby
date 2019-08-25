@@ -25,9 +25,11 @@ public class LobbyListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
-        AbstractLobby lobby = manager.getPlayerLobby(event.getEntity().getUniqueId());
-        if (lobby != null) {
-            lobby.onPlayerDeath(player);
+        if (player != null) {
+            AbstractLobby lobby = manager.getPlayerLobby(event.getEntity().getUniqueId());
+            if (lobby != null) {
+                lobby.onPlayerDeath(player);
+            }
         }
     }
 }

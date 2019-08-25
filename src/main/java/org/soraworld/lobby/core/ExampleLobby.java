@@ -3,6 +3,8 @@ package org.soraworld.lobby.core;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -30,6 +32,7 @@ public final class ExampleLobby extends AbstractLobby {
         transfer.put(loc4_1, loc4_2);
     }
 
+    @NotNull
     public String display() {
         return "Example Lobby";
     }
@@ -42,10 +45,12 @@ public final class ExampleLobby extends AbstractLobby {
         return 20;
     }
 
+    @NotNull
     public RType getRType() {
         return RType.CUBOID_COLUMN;
     }
 
+    @NotNull
     public Map<Location, Location> getTransfer() {
         return transfer;
     }
@@ -54,11 +59,11 @@ public final class ExampleLobby extends AbstractLobby {
         return Calendar.getInstance().get(Calendar.HOUR_OF_DAY) == 14;
     }
 
-    public boolean shouldStart(long lobbyLife, List<Player> players, Map<Location, List<Player>> factions) {
+    public boolean shouldStart(long lobbyLife, @NotNull List<Player> players, @NotNull Map<Location, List<Player>> factions) {
         return lobbyLife >= 400;
     }
 
-    public boolean shouldFinish(long lobbyLife, long gameLife, List<Player> players, Map<Location, List<Player>> factions) {
+    public boolean shouldFinish(long lobbyLife, long gameLife, @NotNull List<Player> players, @NotNull Map<Location, List<Player>> factions) {
         return lobbyLife >= 1000 || gameLife >= 800;
     }
 
@@ -66,15 +71,16 @@ public final class ExampleLobby extends AbstractLobby {
         return time >= 2000;
     }
 
-    public boolean onPlayerJoin(Player player) {
+    public boolean onPlayerJoin(@NotNull Player player) {
         return true;
     }
 
-    public Location onPlayerStart(Player player, Location origin) {
-        return origin;
+    @Nullable
+    public Location onPlayerStart(@NotNull Player player, @NotNull Location origin) {
+        return player.getName().equals("Don'tTransfer") ? null : origin;
     }
 
-    public boolean onPlayerQuit(Player player) {
+    public boolean onPlayerQuit(@NotNull Player player) {
         return getState() != GameState.START;
     }
 
@@ -98,7 +104,7 @@ public final class ExampleLobby extends AbstractLobby {
         Bukkit.broadcastMessage("Example Lobby Closed !");
     }
 
-    public void onPlayerDeath(Player player) {
+    public void onPlayerDeath(@NotNull Player player) {
         kickPlayer(player);
     }
 }

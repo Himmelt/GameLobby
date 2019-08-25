@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.NotNull;
 import org.soraworld.hocon.node.Setting;
 import org.soraworld.lobby.core.AbstractLobby;
 import org.soraworld.lobby.core.ExampleLobby;
@@ -15,9 +16,7 @@ import org.soraworld.violet.plugin.SpigotPlugin;
 import org.soraworld.violet.util.ChatColor;
 
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.StringJoiner;
-import java.util.UUID;
+import java.util.*;
 
 @MainManager
 public class LobbyManager extends VManager {
@@ -43,7 +42,7 @@ public class LobbyManager extends VManager {
      * @param name  名称
      * @param lobby 大厅
      */
-    public void registerGameLobby(String name, AbstractLobby lobby) {
+    public void registerGameLobby(@NotNull String name, @NotNull AbstractLobby lobby) {
         if (registerLobbies.putIfAbsent(name, lobby) != null) {
             consoleKey("gameAlreadyExist", name);
         }
@@ -55,7 +54,7 @@ public class LobbyManager extends VManager {
      * @param name 名称
      * @return 是否已注册
      */
-    public boolean isRegistered(String name) {
+    public boolean isRegistered(@NotNull String name) {
         return registerLobbies.containsKey(name);
     }
 
@@ -65,7 +64,7 @@ public class LobbyManager extends VManager {
      * @param name 名称
      * @return 游戏大厅
      */
-    public AbstractLobby getRegisterLobby(String name) {
+    public AbstractLobby getRegisterLobby(@NotNull String name) {
         return registerLobbies.get(name);
     }
 
@@ -74,28 +73,28 @@ public class LobbyManager extends VManager {
      *
      * @param name 名称
      */
-    public void unregisterGameLobby(String name) {
+    public void unregisterGameLobby(@NotNull String name) {
         registerLobbies.remove(name);
         consoleKey("gameRemoved", name);
     }
 
-    public AbstractLobby getPlayerLobby(UUID uuid) {
+    public AbstractLobby getPlayerLobby(@NotNull UUID uuid) {
         return registerLobbies.get(playerGames.getOrDefault(uuid, ""));
     }
 
-    public void tryOpenGame(CommandSender sender, String name) {
+    public void tryOpenGame(@NotNull CommandSender sender, @NotNull String name) {
         AbstractLobby lobby = registerLobbies.get(name);
         if (lobby != null) lobby.openLobby(sender);
         else sendKey(sender, "gameNotExist", name);
     }
 
-    public void tryCloseGame(CommandSender sender, String name) {
+    public void tryCloseGame(@NotNull CommandSender sender, @NotNull String name) {
         AbstractLobby lobby = registerLobbies.get(name);
         if (lobby != null) lobby.closeLobby(sender);
         else sendKey(sender, "gameNotExist", name);
     }
 
-    public void tryForceFinishGame(CommandSender sender, String name) {
+    public void tryForceFinishGame(@NotNull CommandSender sender, @NotNull String name) {
         AbstractLobby lobby = registerLobbies.get(name);
         if (lobby != null) {
             if (lobby.getState() == GameState.START) {
@@ -107,7 +106,7 @@ public class LobbyManager extends VManager {
         }
     }
 
-    public void tryJoinGame(Player player, String game) {
+    public void tryJoinGame(@NotNull Player player, @NotNull String game) {
         UUID uuid = player.getUniqueId();
         String current = playerGames.get(uuid);
         if (current != null && registerLobbies.containsKey(current)) {
@@ -121,7 +120,8 @@ public class LobbyManager extends VManager {
                 case FINISH:
                     if (lobby.onPlayerJoin(player)) {
                         playerGames.put(uuid, game);
-                        player.teleport(lobby.getCenter());
+                        Location center = lobby.getCenter();
+                        if (center != null) player.teleport(center);
                     } else sendKey(player, "gameRejectJoin", lobby.display());
                     break;
                 case START:
@@ -133,13 +133,13 @@ public class LobbyManager extends VManager {
         } else sendKey(player, "gameNotExist", game);
     }
 
-    public void listGames(CommandSender sender) {
+    public void listGames(@NotNull CommandSender sender) {
         StringJoiner joiner = new StringJoiner(",");
         registerLobbies.keySet().forEach(joiner::add);
         sendKey(sender, "gameList", joiner.toString());
     }
 
-    public void tryQuitGame(Player player) {
+    public void tryQuitGame(@NotNull Player player) {
         UUID uuid = player.getUniqueId();
         String current = playerGames.get(uuid);
         if (current != null) {
@@ -157,7 +157,7 @@ public class LobbyManager extends VManager {
         return updateFrequency;
     }
 
-    public void clearGame(Player player) {
+    public void clearGame(@NotNull Player player) {
         playerGames.remove(player.getUniqueId());
     }
 
@@ -172,7 +172,11 @@ public class LobbyManager extends VManager {
                 updateFrequency, updateFrequency);
     }
 
-    public boolean isJoined(Player player, AbstractLobby lobby) {
+    public boolean isJoined(@NotNull Player player, @NotNull AbstractLobby lobby) {
         return registerLobbies.get(playerGames.getOrDefault(player.getUniqueId(), "")) == lobby;
+    }
+
+    public List<String> getLobbies() {
+        return new ArrayList<>(registerLobbies.keySet());
     }
 }
