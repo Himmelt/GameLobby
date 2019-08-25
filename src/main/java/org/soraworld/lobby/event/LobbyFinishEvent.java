@@ -1,12 +1,12 @@
 package org.soraworld.lobby.event;
 
 import org.bukkit.event.HandlerList;
-import org.soraworld.lobby.core.AbstractLobby;
+import org.soraworld.lobby.core.IGameLobby;
 
 public class LobbyFinishEvent extends LobbyEvent {
     private static final HandlerList handlerList = new HandlerList();
 
-    public LobbyFinishEvent(AbstractLobby lobby) {
+    public LobbyFinishEvent(IGameLobby lobby) {
         super(lobby);
     }
 

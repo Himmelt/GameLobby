@@ -2,19 +2,19 @@ package org.soraworld.lobby.event;
 
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
-import org.soraworld.lobby.core.AbstractLobby;
+import org.soraworld.lobby.core.IGameLobby;
 
 public abstract class LobbyEvent extends Event {
 
     @NotNull
-    private final AbstractLobby lobby;
+    private final IGameLobby lobby;
 
-    protected LobbyEvent(@NotNull AbstractLobby lobby) {
+    protected LobbyEvent(@NotNull IGameLobby lobby) {
         this.lobby = lobby;
     }
 
     @NotNull
-    public AbstractLobby getLobby() {
+    public IGameLobby getLobby() {
         return lobby;
     }
 }

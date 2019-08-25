@@ -7,9 +7,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.soraworld.hocon.node.Setting;
-import org.soraworld.lobby.core.AbstractLobby;
 import org.soraworld.lobby.core.ExampleLobby;
 import org.soraworld.lobby.core.GameState;
+import org.soraworld.lobby.core.IGameLobby;
+import org.soraworld.lobby.core.LobbyData;
 import org.soraworld.violet.inject.MainManager;
 import org.soraworld.violet.manager.VManager;
 import org.soraworld.violet.plugin.SpigotPlugin;
@@ -26,7 +27,8 @@ public class LobbyManager extends VManager {
     private BukkitTask task;
 
     private HashMap<UUID, String> playerGames = new HashMap<>();
-    private HashMap<String, AbstractLobby> registerLobbies = new HashMap<>();
+    private HashMap<String, IGameLobby> registerLobbies = new HashMap<>();
+    private HashMap<IGameLobby, LobbyData> lobbyDataMap = new HashMap<>();
 
     public LobbyManager(SpigotPlugin plugin, Path path) {
         super(plugin, path);
@@ -42,8 +44,9 @@ public class LobbyManager extends VManager {
      * @param name  名称
      * @param lobby 大厅
      */
-    public void registerGameLobby(@NotNull String name, @NotNull AbstractLobby lobby) {
+    public void registerGameLobby(@NotNull String name, @NotNull IGameLobby lobby) {
         if (registerLobbies.putIfAbsent(name, lobby) != null) {
+            lobbyDataMap.put(lobby, new LobbyData());
             consoleKey("gameAlreadyExist", name);
         }
     }
@@ -64,7 +67,7 @@ public class LobbyManager extends VManager {
      * @param name 名称
      * @return 游戏大厅
      */
-    public AbstractLobby getRegisterLobby(@NotNull String name) {
+    public IGameLobby getRegisterLobby(@NotNull String name) {
         return registerLobbies.get(name);
     }
 
@@ -74,28 +77,29 @@ public class LobbyManager extends VManager {
      * @param name 名称
      */
     public void unregisterGameLobby(@NotNull String name) {
-        registerLobbies.remove(name);
+        IGameLobby lobby = registerLobbies.remove(name);
+        lobbyDataMap.remove(lobby);
         consoleKey("gameRemoved", name);
     }
 
-    public AbstractLobby getPlayerLobby(@NotNull UUID uuid) {
+    public IGameLobby getPlayerLobby(@NotNull UUID uuid) {
         return registerLobbies.get(playerGames.getOrDefault(uuid, ""));
     }
 
     public void tryOpenGame(@NotNull CommandSender sender, @NotNull String name) {
-        AbstractLobby lobby = registerLobbies.get(name);
+        IGameLobby lobby = registerLobbies.get(name);
         if (lobby != null) lobby.openLobby(sender);
         else sendKey(sender, "gameNotExist", name);
     }
 
     public void tryCloseGame(@NotNull CommandSender sender, @NotNull String name) {
-        AbstractLobby lobby = registerLobbies.get(name);
+        IGameLobby lobby = registerLobbies.get(name);
         if (lobby != null) lobby.closeLobby(sender);
         else sendKey(sender, "gameNotExist", name);
     }
 
     public void tryForceFinishGame(@NotNull CommandSender sender, @NotNull String name) {
-        AbstractLobby lobby = registerLobbies.get(name);
+        IGameLobby lobby = registerLobbies.get(name);
         if (lobby != null) {
             if (lobby.getState() == GameState.START) {
                 lobby.finishGame();
@@ -113,7 +117,7 @@ public class LobbyManager extends VManager {
             sendKey(player, "alreadyInGame", registerLobbies.get(current).display());
             return;
         }
-        AbstractLobby lobby = registerLobbies.get(game);
+        IGameLobby lobby = registerLobbies.get(game);
         if (lobby != null) {
             switch (lobby.getState()) {
                 case OPEN:
@@ -143,7 +147,7 @@ public class LobbyManager extends VManager {
         UUID uuid = player.getUniqueId();
         String current = playerGames.get(uuid);
         if (current != null) {
-            AbstractLobby lobby = registerLobbies.get(current);
+            IGameLobby lobby = registerLobbies.get(current);
             if (lobby != null) {
                 if (lobby.onPlayerQuit(player)) {
                     playerGames.remove(uuid);
@@ -168,15 +172,20 @@ public class LobbyManager extends VManager {
         }
         if (task != null) task.cancel();
         task = Bukkit.getScheduler().runTaskTimer(plugin,
-                () -> registerLobbies.values().forEach(AbstractLobby::update),
+                () -> registerLobbies.values().forEach(IGameLobby::update),
                 updateFrequency, updateFrequency);
     }
 
-    public boolean isJoined(@NotNull Player player, @NotNull AbstractLobby lobby) {
+    public boolean isJoined(@NotNull Player player, @NotNull IGameLobby lobby) {
         return registerLobbies.get(playerGames.getOrDefault(player.getUniqueId(), "")) == lobby;
     }
 
     public List<String> getLobbies() {
         return new ArrayList<>(registerLobbies.keySet());
+    }
+
+    @NotNull
+    public LobbyData getLobbyData(@NotNull IGameLobby lobby) {
+        return lobbyDataMap.computeIfAbsent(lobby, l -> new LobbyData());
     }
 }

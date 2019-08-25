@@ -6,7 +6,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.soraworld.lobby.core.AbstractLobby;
+import org.soraworld.lobby.core.IGameLobby;
 import org.soraworld.lobby.manager.LobbyManager;
 import org.soraworld.violet.inject.EventListener;
 import org.soraworld.violet.inject.Inject;
@@ -26,7 +26,7 @@ public class LobbyListener implements Listener {
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
         if (player != null) {
-            AbstractLobby lobby = manager.getPlayerLobby(event.getEntity().getUniqueId());
+            IGameLobby lobby = manager.getPlayerLobby(event.getEntity().getUniqueId());
             if (lobby != null) {
                 lobby.onPlayerDeath(player);
             }

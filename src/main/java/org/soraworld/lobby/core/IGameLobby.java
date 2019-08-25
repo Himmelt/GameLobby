@@ -4,60 +4,45 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.PluginManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.soraworld.lobby.GameLobby;
 import org.soraworld.lobby.event.*;
-import org.soraworld.lobby.manager.LobbyManager;
-import org.soraworld.violet.inject.Inject;
 
 import java.util.*;
 
 /**
  * 游戏大厅接口.
  */
-@Inject
-public abstract class AbstractLobby {
-
-    private long gameLife = 0;
-    private long lobbyLife = 0;
-    private GameState state = GameState.CLOSE;
-    private final PluginManager pluginManager = Bukkit.getPluginManager();
-    private final ArrayList<Player> players = new ArrayList<>();
-    private final HashMap<Location, List<Player>> factions = new HashMap<>();
-
-    @Inject
-    private static LobbyManager manager;
+public interface IGameLobby {
 
     /**
      * 游戏大厅显示名.
      *
      * @return 显示名 string
      */
-    @NotNull
-    public abstract String display();
+    @NotNull String display();
 
     /**
      * 获取游戏大厅的中心位置.
      *
      * @return 中心位置 center
      */
-    public abstract Location getCenter();
+    Location getCenter();
 
     /**
      * 获取大厅半径.
      *
      * @return 大厅半径 radius
      */
-    public abstract int getRadius();
+    int getRadius();
 
     /**
      * 获取大厅半径类型.
      *
      * @return 大厅半径类型 r type
      */
-    @NotNull
-    public abstract RType getRType();
+    @NotNull RType getRType();
 
     /**
      * 获取传送映射信息.
@@ -67,8 +52,7 @@ public abstract class AbstractLobby {
      *
      * @return 传送映射信息 transfer
      */
-    @NotNull
-    public abstract Map<Location, Location> getTransfer();
+    @NotNull Map<Location, Location> getTransfer();
 
     /**
      * 是否开启大厅.
@@ -78,22 +62,22 @@ public abstract class AbstractLobby {
      *
      * @return 是否开启大厅
      */
-    public abstract boolean shouldOpen();
+    boolean shouldOpen();
 
     /**
      * 是否开始游戏.
-     * 若开始,则传送玩家到 {@link AbstractLobby#getTransfer} 设定的目标位置
+     * 若开始,则传送玩家到 {@link IGameLobby#getTransfer} 设定的目标位置
      *
      * @param lobbyLife 从大厅启动到当前的时间，单位 tick
      * @param players   当前大厅玩家列表
      * @param factions  每个阵营的玩家列表
      * @return 是否开始传送 boolean
      */
-    public abstract boolean shouldStart(long lobbyLife, @NotNull final List<Player> players, @NotNull final Map<Location, @NotNull List<Player>> factions);
+    boolean shouldStart(long lobbyLife, @NotNull final List<Player> players, @NotNull final Map<Location, @NotNull List<Player>> factions);
 
     /**
      * 是否结束游戏.
-     * 若结束,则传送玩家到 {@link AbstractLobby#getCenter} 设定的位置
+     * 若结束,则传送玩家到 {@link IGameLobby#getCenter} 设定的位置
      *
      * @param lobbyLife 从大厅启动到当前的时间，单位 tick
      * @param gameLife  游戏开始至此刻的时间
@@ -101,7 +85,7 @@ public abstract class AbstractLobby {
      * @param factions  每个阵营的玩家列表
      * @return 是否开始传送 boolean
      */
-    public abstract boolean shouldFinish(long lobbyLife, long gameLife, @NotNull final List<Player> players, @NotNull final Map<Location, List<Player>> factions);
+    boolean shouldFinish(long lobbyLife, long gameLife, @NotNull final List<Player> players, @NotNull final Map<Location, List<Player>> factions);
 
     /**
      * 是否关闭游戏大厅.
@@ -110,7 +94,7 @@ public abstract class AbstractLobby {
      * @param time 从大厅启动到当前的时间，单位 tick
      * @return 是否开始传送 boolean
      */
-    public abstract boolean shouldClose(long time);
+    boolean shouldClose(long time);
 
     /**
      * 当玩家尝试加入大厅时.
@@ -119,7 +103,7 @@ public abstract class AbstractLobby {
      * @param player 玩家
      * @return 是否允许加入 boolean
      */
-    public abstract boolean onPlayerJoin(@NotNull Player player);
+    boolean onPlayerJoin(@NotNull Player player);
 
     /**
      * 当玩家尝试被传送游戏传送点时.
@@ -129,8 +113,7 @@ public abstract class AbstractLobby {
      * @param origin 原始传送位置
      * @return 最终传送位置
      */
-    @Nullable
-    public abstract Location onPlayerStart(@NotNull Player player, @NotNull Location origin);
+    @Nullable Location onPlayerStart(@NotNull Player player, @NotNull Location origin);
 
     /**
      * 当玩家主动退出时.
@@ -139,17 +122,17 @@ public abstract class AbstractLobby {
      * @param player 玩家
      * @return 是否允许退出 boolean
      */
-    public abstract boolean onPlayerQuit(@NotNull Player player);
+    boolean onPlayerQuit(@NotNull Player player);
 
     /**
      * 大厅开启时.
      */
-    public abstract void onOpen();
+    void onOpen();
 
     /**
      * 游戏开始时.
      */
-    public abstract void onStart();
+    void onStart();
 
     /**
      * 游戏周期更新时.
@@ -157,40 +140,41 @@ public abstract class AbstractLobby {
      * @param lobbyLife 大厅开启至今的时长(单位: tick)
      * @param gameLife  游戏开始至此刻的时间
      */
-    public abstract void onUpdate(long lobbyLife, long gameLife);
+    void onUpdate(long lobbyLife, long gameLife);
 
     /**
      * 游戏结束时.
      */
-    public abstract void onFinish();
+    void onFinish();
 
     /**
      * 大厅关闭时.
      */
-    public abstract void onClose();
+    void onClose();
 
     /**
      * 在玩家死亡时.
      *
      * @param player 玩家
      */
-    public abstract void onPlayerDeath(@NotNull Player player);
+    void onPlayerDeath(@NotNull Player player);
 
     /**
      * 开启游戏大厅.
      *
      * @param sender the sender
      */
-    public final void openLobby(@Nullable CommandSender sender) {
-        if (state.canOpen()) {
-            pluginManager.callEvent(new LobbyOpenEvent(this));
+    default void openLobby(@Nullable CommandSender sender) {
+        LobbyData data = GameLobby.getLobbyManager().getLobbyData(this);
+        if (data.state.canOpen()) {
+            Bukkit.getPluginManager().callEvent(new LobbyOpenEvent(this));
             onOpen();
-            lobbyLife = 0;
-            gameLife = 0;
-            state = GameState.OPEN;
-            if (sender != null) manager.sendKey(sender, "openLobby", display());
+            data.lobbyLife = 0;
+            data.gameLife = 0;
+            data.state = GameState.OPEN;
+            if (sender != null) GameLobby.getLobbyManager().sendKey(sender, "openLobby", display());
         } else if (sender != null) {
-            manager.sendKey(sender, "cantOpenLobby", display(), state);
+            GameLobby.getLobbyManager().sendKey(sender, "cantOpenLobby", display(), data.state);
         }
     }
 
@@ -199,37 +183,39 @@ public abstract class AbstractLobby {
      *
      * @param sender the sender
      */
-    public final void closeLobby(@Nullable CommandSender sender) {
-        if (state.canClose()) {
-            pluginManager.callEvent(new LobbyCloseEvent(this));
+    default void closeLobby(@Nullable CommandSender sender) {
+        LobbyData data = GameLobby.getLobbyManager().getLobbyData(this);
+        if (data.state.canClose()) {
+            Bukkit.getPluginManager().callEvent(new LobbyCloseEvent(this));
             onClose();
-            if (state != GameState.FINISH) {
-                players.forEach(manager::clearGame);
-                players.clear();
-                factions.clear();
+            if (data.state != GameState.FINISH) {
+                data.players.forEach(GameLobby.getLobbyManager()::clearGame);
+                data.players.clear();
+                data.factions.clear();
             }
-            state = GameState.CLOSE;
-            if (sender != null) manager.sendKey(sender, "closeLobby", display());
+            data.state = GameState.CLOSE;
+            if (sender != null) GameLobby.getLobbyManager().sendKey(sender, "closeLobby", display());
         } else if (sender != null) {
-            manager.sendKey(sender, "stateCantClose", display(), state);
+            GameLobby.getLobbyManager().sendKey(sender, "stateCantClose", display(), data.state);
         }
     }
 
     /**
      * 游戏周期更新.
      */
-    public final void update() {
+    default void update() {
+        LobbyData data = GameLobby.getLobbyManager().getLobbyData(this);
         if (shouldOpen()) openLobby(null);
-        if (state != GameState.CLOSE) {
-            lobbyLife += manager.updateFrequency();
-            if (state == GameState.OPEN) {
+        if (data.state != GameState.CLOSE) {
+            data.lobbyLife += GameLobby.getLobbyManager().updateFrequency();
+            if (data.state == GameState.OPEN) {
                 checkLobby();
-                if (shouldStart(lobbyLife, players, factions)) {
-                    pluginManager.callEvent(new LobbyStartEvent(this));
+                if (shouldStart(data.lobbyLife, data.players, data.factions)) {
+                    Bukkit.getPluginManager().callEvent(new LobbyStartEvent(this));
                     onStart();
-                    state = GameState.START;
+                    data.state = GameState.START;
                     Map<Location, Location> transfer = getTransfer();
-                    factions.forEach((fac, players) -> {
+                    data.factions.forEach((fac, players) -> {
                         Location target = transfer.get(fac);
                         if (target != null) players.forEach(player -> {
                             Location loc = onPlayerStart(player, target);
@@ -238,13 +224,13 @@ public abstract class AbstractLobby {
                     });
                 }
             }
-            if (state == GameState.START) gameLife += manager.updateFrequency();
-            pluginManager.callEvent(new LobbyUpdateEvent(this));
-            onUpdate(lobbyLife, gameLife);
-            if (state.canFinish() && shouldFinish(lobbyLife, gameLife, players, factions)) {
+            if (data.state == GameState.START) data.gameLife += GameLobby.getLobbyManager().updateFrequency();
+            Bukkit.getPluginManager().callEvent(new LobbyUpdateEvent(this));
+            onUpdate(data.lobbyLife, data.gameLife);
+            if (data.state.canFinish() && shouldFinish(data.lobbyLife, data.gameLife, data.players, data.factions)) {
                 finishGame();
             }
-            if (state.canClose() && shouldClose(lobbyLife)) {
+            if (data.state.canClose() && shouldClose(data.lobbyLife)) {
                 closeLobby(null);
             }
         }
@@ -253,22 +239,24 @@ public abstract class AbstractLobby {
     /**
      * (强制)结束游戏，并传送所有玩家回大厅中心.
      */
-    public final void finishGame() {
-        pluginManager.callEvent(new LobbyFinishEvent(this));
+    default void finishGame() {
+        LobbyData data = GameLobby.getLobbyManager().getLobbyData(this);
+        Bukkit.getPluginManager().callEvent(new LobbyFinishEvent(this));
         onFinish();
         Location center = getCenter();
-        if (center != null) players.forEach(player -> {
-            manager.clearGame(player);
+        if (center != null) data.players.forEach(player -> {
+            GameLobby.getLobbyManager().clearGame(player);
             player.teleport(center);
         });
-        players.clear();
-        factions.clear();
-        state = GameState.FINISH;
+        data.players.clear();
+        data.factions.clear();
+        data.state = GameState.FINISH;
     }
 
-    private void checkLobby() {
-        players.clear();
-        factions.clear();
+    default void checkLobby() {
+        LobbyData data = GameLobby.getLobbyManager().getLobbyData(this);
+        data.players.clear();
+        data.factions.clear();
         Location center = getCenter();
         if (center == null) return;
         double cX = center.getX(), cY = center.getY(), cZ = center.getZ();
@@ -276,7 +264,7 @@ public abstract class AbstractLobby {
         RType type = getRType();
         Set<Location> locations = getTransfer().keySet();
         center.getWorld().getPlayers().forEach(player -> {
-            if (manager.isJoined(player, this)) {
+            if (GameLobby.getLobbyManager().isJoined(player, this)) {
                 Location pLoc = player.getLocation();
                 double pX = pLoc.getX(), pY = pLoc.getY(), pZ = pLoc.getZ();
                 switch (type) {
@@ -285,8 +273,8 @@ public abstract class AbstractLobby {
                         double maxX = cX + radius, maxY = cY + radius, maxZ = cZ + radius;
                         if (pX >= minX && pX <= maxX && pY >= minY && pY <= maxY && pZ >= minZ && pZ <= maxZ) {
                             Location fac = getNearestLoc(locations, pLoc);
-                            factions.computeIfAbsent(fac, location -> new ArrayList<>()).add(player);
-                            players.add(player);
+                            data.factions.computeIfAbsent(fac, location -> new ArrayList<>()).add(player);
+                            data.players.add(player);
                         }
                         break;
                     }
@@ -295,24 +283,24 @@ public abstract class AbstractLobby {
                         double maxX = cX + radius, maxZ = cZ + radius;
                         if (pX >= minX && pX <= maxX && pZ >= minZ && pZ <= maxZ) {
                             Location fac = getNearestLoc(locations, pLoc);
-                            factions.computeIfAbsent(fac, location -> new ArrayList<>()).add(player);
-                            players.add(player);
+                            data.factions.computeIfAbsent(fac, location -> new ArrayList<>()).add(player);
+                            data.players.add(player);
                         }
                         break;
                     }
                     case SPHERE: {
                         if ((cX - pX) * (cX - pX) + (cY - pY) * (cY - pY) + (cZ - pZ) * (cZ - pZ) <= radius * radius) {
                             Location fac = getNearestLoc(locations, pLoc);
-                            factions.computeIfAbsent(fac, location -> new ArrayList<>()).add(player);
-                            players.add(player);
+                            data.factions.computeIfAbsent(fac, location -> new ArrayList<>()).add(player);
+                            data.players.add(player);
                         }
                         break;
                     }
                     case CIRCLE_COLUMN: {
                         if ((cX - pX) * (cX - pX) + (cZ - pZ) * (cZ - pZ) <= radius * radius) {
                             Location fac = getNearestLoc(locations, pLoc);
-                            factions.computeIfAbsent(fac, location -> new ArrayList<>()).add(player);
-                            players.add(player);
+                            data.factions.computeIfAbsent(fac, location -> new ArrayList<>()).add(player);
+                            data.players.add(player);
                         }
                     }
                 }
@@ -325,8 +313,8 @@ public abstract class AbstractLobby {
      *
      * @return 状态
      */
-    public final GameState getState() {
-        return state;
+    default GameState getState() {
+        return GameLobby.getLobbyManager().getLobbyData(this).state;
     }
 
     /**
@@ -334,8 +322,8 @@ public abstract class AbstractLobby {
      *
      * @return 开启时长
      */
-    public final long getLobbyLife() {
-        return lobbyLife;
+    default long getLobbyLife() {
+        return GameLobby.getLobbyManager().getLobbyData(this).lobbyLife;
     }
 
     /**
@@ -343,8 +331,8 @@ public abstract class AbstractLobby {
      *
      * @return 游戏开始时长
      */
-    public final long getGameLife() {
-        return gameLife;
+    default long getGameLife() {
+        return GameLobby.getLobbyManager().getLobbyData(this).gameLife;
     }
 
     /**
@@ -352,10 +340,11 @@ public abstract class AbstractLobby {
      *
      * @param player 玩家
      */
-    public final void kickPlayer(@NotNull Player player) {
-        players.remove(player);
-        factions.forEach((location, ps) -> ps.remove(player));
-        manager.clearGame(player);
+    default void kickPlayer(@NotNull Player player) {
+        LobbyData data = GameLobby.getLobbyManager().getLobbyData(this);
+        data.players.remove(player);
+        data.factions.forEach((location, ps) -> ps.remove(player));
+        GameLobby.getLobbyManager().clearGame(player);
     }
 
     /**
@@ -363,20 +352,33 @@ public abstract class AbstractLobby {
      *
      * @param player 目标玩家
      */
-    public final void tpPlayerToLobby(@NotNull Player player) {
+    default void tpPlayerToLobby(@NotNull Player player) {
         Location center = getCenter();
         if (center != null) player.teleport(center);
     }
 
-    public final void broadcastKey(@NotNull String key, Object... args) {
-        players.forEach(player -> manager.sendKey(player, key, args));
+    /**
+     * 向游戏内玩家广播消息.
+     *
+     * @param message 消息
+     */
+    default void gameBroadcast(@NotNull String message) {
+        LobbyData data = GameLobby.getLobbyManager().getLobbyData(this);
+        data.players.forEach(player -> GameLobby.getLobbyManager().send(player, message));
     }
 
-    public final void broadcast(@NotNull String message) {
-        players.forEach(player -> manager.send(player, message));
+    /**
+     * 向游戏内玩家广播消息.
+     *
+     * @param key  键
+     * @param args 参数
+     */
+    default void gameBroadcastKey(@NotNull String key, Object... args) {
+        LobbyData data = GameLobby.getLobbyManager().getLobbyData(this);
+        data.players.forEach(player -> GameLobby.getLobbyManager().sendKey(player, key, args));
     }
 
-    private static Location getNearestLoc(@NotNull Collection<Location> locations, @NotNull Location source) {
+    static Location getNearestLoc(@NotNull Collection<Location> locations, @NotNull Location source) {
         double min = Double.MAX_VALUE;
         Location target = null;
         for (Location loc : locations) {

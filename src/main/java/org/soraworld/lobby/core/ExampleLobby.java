@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class ExampleLobby extends AbstractLobby {
+public final class ExampleLobby implements IGameLobby {
 
     private final Location center;
     private final HashMap<Location, Location> transfer = new HashMap<>();
