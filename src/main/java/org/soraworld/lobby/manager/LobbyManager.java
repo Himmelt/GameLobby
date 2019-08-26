@@ -4,9 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
-import org.soraworld.hocon.node.Setting;
 import org.soraworld.lobby.core.ExampleLobby;
 import org.soraworld.lobby.core.GameState;
 import org.soraworld.lobby.core.IGameLobby;
@@ -21,10 +19,6 @@ import java.util.*;
 
 @MainManager
 public class LobbyManager extends VManager {
-
-    @Setting(comment = "comment.updateFrequency")
-    private int updateFrequency = 20;
-    private BukkitTask task;
 
     private HashMap<UUID, String> playerGames = new HashMap<>();
     private HashMap<String, IGameLobby> registerLobbies = new HashMap<>();
@@ -41,13 +35,16 @@ public class LobbyManager extends VManager {
     /**
      * 注册游戏大厅.
      *
-     * @param name  名称
      * @param lobby 大厅
      */
-    public void registerGameLobby(@NotNull String name, @NotNull IGameLobby lobby) {
-        if (registerLobbies.putIfAbsent(name, lobby) != null) {
-            lobbyDataMap.put(lobby, new LobbyData());
-            consoleKey("gameAlreadyExist", name);
+    public void registerGameLobby(@NotNull IGameLobby lobby) {
+        if (registerLobbies.putIfAbsent(lobby.id(), lobby) != null) {
+            consoleKey("gameAlreadyExist", lobby.id());
+        } else {
+            LobbyData data = new LobbyData();
+            data.task = Bukkit.getScheduler().runTaskTimer(plugin, lobby::update, lobby.cycle(), lobby.cycle());
+            lobbyDataMap.put(lobby, data);
+            consoleKey("gameRegisterSuccess", lobby.id());
         }
     }
 
@@ -78,8 +75,16 @@ public class LobbyManager extends VManager {
      */
     public void unregisterGameLobby(@NotNull String name) {
         IGameLobby lobby = registerLobbies.remove(name);
-        lobbyDataMap.remove(lobby);
-        consoleKey("gameRemoved", name);
+        if (lobby != null) {
+            LobbyData data = lobbyDataMap.remove(lobby);
+            if (data != null) {
+                data.players.forEach(p -> playerGames.remove(p.getUniqueId()));
+                data.players.clear();
+                data.factions.clear();
+                if (data.task != null) data.task.cancel();
+            }
+            consoleKey("gameRemoved", name);
+        } else consoleKey("gameNotExist", name);
     }
 
     public IGameLobby getPlayerLobby(@NotNull UUID uuid) {
@@ -157,10 +162,6 @@ public class LobbyManager extends VManager {
         } else sendKey(player, "notJoinAnyGame");
     }
 
-    public int updateFrequency() {
-        return updateFrequency;
-    }
-
     public void clearGame(@NotNull Player player) {
         playerGames.remove(player.getUniqueId());
     }
@@ -168,12 +169,8 @@ public class LobbyManager extends VManager {
     @Override
     public void afterLoad() {
         if (!registerLobbies.containsKey("example")) {
-            registerGameLobby("example", new ExampleLobby(new Location(Bukkit.getWorlds().get(0), 0, 100, 0)));
+            registerGameLobby(new ExampleLobby(new Location(Bukkit.getWorlds().get(0), 0, 100, 0)));
         }
-        if (task != null) task.cancel();
-        task = Bukkit.getScheduler().runTaskTimer(plugin,
-                () -> registerLobbies.values().forEach(IGameLobby::update),
-                updateFrequency, updateFrequency);
     }
 
     public boolean isJoined(@NotNull Player player, @NotNull IGameLobby lobby) {
@@ -187,5 +184,23 @@ public class LobbyManager extends VManager {
     @NotNull
     public LobbyData getLobbyData(@NotNull IGameLobby lobby) {
         return lobbyDataMap.computeIfAbsent(lobby, l -> new LobbyData());
+    }
+
+    public void showInfo(@NotNull CommandSender sender, @NotNull String game) {
+        IGameLobby lobby = registerLobbies.get(game);
+        if (lobby != null) {
+            Location center = lobby.getCenter();
+            String text = "{" + center.getWorld().getName() + "," + center.getBlockX() + "," + center.getBlockY() + "," + center.getBlockZ() + "}";
+            sendKey(sender, "info.head");
+            sendKey(sender, "info.display", lobby.display());
+            sendKey(sender, "info.center", text);
+            sendKey(sender, "info.state", lobby.getState().toString());
+            sendKey(sender, "info.foot");
+        }
+    }
+
+    public void unregisterAllLobbies() {
+        List<String> ids = new ArrayList<>(registerLobbies.keySet());
+        ids.forEach(this::unregisterGameLobby);
     }
 }

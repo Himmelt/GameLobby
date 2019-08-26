@@ -6,7 +6,7 @@ import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.plugin.SpigotPlugin;
 
 @Inject
-public final class GameLobby extends SpigotPlugin {
+public final class GameLobby extends SpigotPlugin<LobbyManager> {
 
     @Inject
     private static LobbyManager theManager;
@@ -14,6 +14,11 @@ public final class GameLobby extends SpigotPlugin {
     @Override
     public String getId() {
         return "lobby";
+    }
+
+    @Override
+    public void beforeDisable() {
+        manager.unregisterAllLobbies();
     }
 
     /**
@@ -28,11 +33,10 @@ public final class GameLobby extends SpigotPlugin {
     /**
      * 注册游戏大厅.
      *
-     * @param name  名称
      * @param lobby 大厅
      */
-    public static void registerGameLobby(String name, IGameLobby lobby) {
-        if (theManager != null) theManager.registerGameLobby(name, lobby);
+    public static void registerGameLobby(IGameLobby lobby) {
+        if (theManager != null) theManager.registerGameLobby(lobby);
     }
 
     /**

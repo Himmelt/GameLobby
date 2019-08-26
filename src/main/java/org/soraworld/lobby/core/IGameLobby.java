@@ -17,6 +17,20 @@ import java.util.*;
 public interface IGameLobby {
 
     /**
+     * 游戏大厅 id.
+     *
+     * @return id string
+     */
+    @NotNull String id();
+
+    /**
+     * 计划任务执行周期.
+     *
+     * @return 周期 int
+     */
+    int cycle();
+
+    /**
      * 游戏大厅显示名.
      *
      * @return 显示名 string
@@ -60,7 +74,7 @@ public interface IGameLobby {
      * 比如每天晚上 8 点开启。
      * 游戏必须处于 {@link GameState#CLOSE} 或 {@link GameState#FINISH} 状态.
      *
-     * @return 是否开启大厅
+     * @return 是否开启大厅 boolean
      */
     boolean shouldOpen();
 
@@ -111,7 +125,7 @@ public interface IGameLobby {
      *
      * @param player 玩家
      * @param origin 原始传送位置
-     * @return 最终传送位置
+     * @return 最终传送位置 location
      */
     @Nullable Location onPlayerStart(@NotNull Player player, @NotNull Location origin);
 
@@ -207,7 +221,7 @@ public interface IGameLobby {
         LobbyData data = GameLobby.getLobbyManager().getLobbyData(this);
         if (shouldOpen()) openLobby(null);
         if (data.state != GameState.CLOSE) {
-            data.lobbyLife += GameLobby.getLobbyManager().updateFrequency();
+            data.lobbyLife += cycle();
             if (data.state == GameState.OPEN) {
                 checkLobby();
                 if (shouldStart(data.lobbyLife, data.players, data.factions)) {
@@ -224,7 +238,7 @@ public interface IGameLobby {
                     });
                 }
             }
-            if (data.state == GameState.START) data.gameLife += GameLobby.getLobbyManager().updateFrequency();
+            if (data.state == GameState.START) data.gameLife += cycle();
             Bukkit.getPluginManager().callEvent(new LobbyUpdateEvent(this));
             onUpdate(data.lobbyLife, data.gameLife);
             if (data.state.canFinish() && shouldFinish(data.lobbyLife, data.gameLife, data.players, data.factions)) {
@@ -253,6 +267,9 @@ public interface IGameLobby {
         data.state = GameState.FINISH;
     }
 
+    /**
+     * 检查大厅人员状态.
+     */
     default void checkLobby() {
         LobbyData data = GameLobby.getLobbyManager().getLobbyData(this);
         data.players.clear();
@@ -311,7 +328,7 @@ public interface IGameLobby {
     /**
      * 获取游戏大厅状态.
      *
-     * @return 状态
+     * @return 状态 state
      */
     default GameState getState() {
         return GameLobby.getLobbyManager().getLobbyData(this).state;
@@ -320,7 +337,7 @@ public interface IGameLobby {
     /**
      * 获取大厅最近一次开启至此刻的时间.
      *
-     * @return 开启时长
+     * @return 开启时长 lobby life
      */
     default long getLobbyLife() {
         return GameLobby.getLobbyManager().getLobbyData(this).lobbyLife;
@@ -329,7 +346,7 @@ public interface IGameLobby {
     /**
      * 获取游戏开始至此刻的时间.
      *
-     * @return 游戏开始时长
+     * @return 游戏开始时长 game life
      */
     default long getGameLife() {
         return GameLobby.getLobbyManager().getLobbyData(this).gameLife;
@@ -378,6 +395,13 @@ public interface IGameLobby {
         data.players.forEach(player -> GameLobby.getLobbyManager().sendKey(player, key, args));
     }
 
+    /**
+     * 获取最近的位置.
+     *
+     * @param locations 位置集合
+     * @param source    源
+     * @return 最近的位置
+     */
     static Location getNearestLoc(@NotNull Collection<Location> locations, @NotNull Location source) {
         double min = Double.MAX_VALUE;
         Location target = null;

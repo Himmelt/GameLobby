@@ -6,6 +6,7 @@ chatHead = "[GameLobby] "
 gameList = "Registered games are: %s."
 gameNotExist = "Game lobby named %s is not exist."
 gameAlreadyExist = "Game lobby named %s is already registered!"
+gameRegisterSuccess = "Game lobby named %s register success!"
 gameRemoved = "Game lobby named %s is unregistered!"
 openLobby = "Opened %s game lobby."
 cantOpenLobby = "Game %s is in %s state，can't do this."
@@ -22,3 +23,11 @@ gameRejectQuit = "Lobby %s reject you quit game."
 notJoinAnyGame = "You are not in any game."
 
 comment.updateFrequency = "Lobby check frequency(tick)"
+
+info {
+  head = "================= Game Lobby Info ================="
+  display = "Display: %s"
+  center = "Center: %s"
+  state = "State: %s"
+  foot = "================================================"
+}

@@ -6,6 +6,7 @@ chatHead = "[游戏大厅] "
 gameList = "已注册的游戏大厅有: %s."
 gameNotExist = "名为 %s 的游戏大厅不存在."
 gameAlreadyExist = "名为 %s 的游戏大厅已注册，不可重复注册!"
+gameRegisterSuccess = "名为 %s 的游戏大厅注册成功!"
 gameRemoved = "名为 %s 的游戏大厅已取消注册!"
 openLobby = "已开启 %s 游戏大厅."
 cantOpenLobby = "游戏 %s 处于 %s 状态，无法完成操作."
@@ -22,3 +23,11 @@ gameRejectQuit = "游戏大厅 %s 拒绝你退出游戏."
 notJoinAnyGame = "你尚未加入任何游戏大厅."
 
 comment.updateFrequency = "大厅检测频率(单位: tick)"
+
+info {
+  head = "================= 游戏大厅信息 ================="
+  display = "显示名: %s"
+  center = "位  置: %s"
+  state = "状  态: %s"
+  foot = "================================================"
+}

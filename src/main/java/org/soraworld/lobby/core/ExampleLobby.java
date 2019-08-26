@@ -32,6 +32,16 @@ public final class ExampleLobby implements IGameLobby {
         transfer.put(loc4_1, loc4_2);
     }
 
+    @Override
+    public @NotNull String id() {
+        return "example";
+    }
+
+    @Override
+    public int cycle() {
+        return 10;
+    }
+
     @NotNull
     public String display() {
         return "Example Lobby";

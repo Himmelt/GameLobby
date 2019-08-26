@@ -10,7 +10,7 @@ import org.soraworld.violet.inject.Command;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.util.ListUtils;
 
-@Command(name = "lobby", usage = "/lobby open|close|finish|join|quit|list")
+@Command(name = "lobby", usage = "/lobby open|close|info|finish|join|quit|list")
 public final class CommandLobby {
 
     @Inject
@@ -35,6 +35,16 @@ public final class CommandLobby {
 
     @Tab(path = "close")
     public final TabExecutor tab_close = (cmd, sender, args) -> ListUtils.getMatchListIgnoreCase(args.first(), manager.getLobbies());
+
+    @Sub(perm = "admin", usage = "/lobby info <game_name>")
+    public final SubExecutor info = (cmd, sender, args) -> {
+        if (args.notEmpty()) {
+            manager.showInfo(sender, args.first());
+        } else cmd.sendUsage(sender);
+    };
+
+    @Tab(path = "info")
+    public final TabExecutor tab_info = (cmd, sender, args) -> ListUtils.getMatchListIgnoreCase(args.first(), manager.getLobbies());
 
     @Sub(perm = "admin", usage = "/lobby finish <game_name>")
     public final SubExecutor finish = (cmd, sender, args) -> {
