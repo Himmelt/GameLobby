@@ -1,6 +1,10 @@
 # GameLobby
 GameLobby
 
+[![TravisCI](https://img.shields.io/travis/Himmelt/GameLobby/master.svg?label=TravisCI&logo=travis-ci)](https://travis-ci.org/Himmelt/GameLobby)
+[![License](https://img.shields.io/github/license/Himmelt/GameLobby.svg?color=important)](https://github.com/Himmelt/GameLobby/blob/master/LICENSE)
+[![Download](https://img.shields.io/badge/Download-snapshot|gamelobby-success.svg)](https://oss.jfrog.org/artifactory/oss-snapshot-local/org/soraworld/gamelobby/)
+
 ### 命令
 ```
 /lobby open <game_name>     开启游戏大厅
