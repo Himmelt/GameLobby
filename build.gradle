@@ -1,7 +1,24 @@
+buildscript {
+    repositories {
+        maven {
+            url = 'https://plugins.gradle.org/m2/'
+        }
+        maven {
+            url = 'https://maven.aliyun.com/repository/public/'
+        }
+    }
+    dependencies {
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.7.2"
+    }
+}
+
 apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.artifactory'
 
 group = 'org.soraworld'
-version = '1.2.0'
+version = '1.2.0-SNAPSHOT'
 
 sourceCompatibility = targetCompatibility = 1.8
 
@@ -14,9 +31,68 @@ repositories {
 
 dependencies {
     compile 'org.soraworld:violet-spigot:2.4.2-SNAPSHOT'
-    compile 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
+    compileOnly 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
 }
 
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
+}
+
+javadoc {
+    options.encoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+    source = sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+    includeEmptyDirs = false
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allJava
+    includeEmptyDirs = false
+}
+
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}
+
+publishing {
+    publications {
+        mavenRelease(MavenPublication) {
+            from components.java
+            groupId = 'org.soraworld'
+            artifactId = 'gamelobby'
+            version = project.version
+            artifact sourcesJar
+            artifact javadocJar
+        }
+        mavenSnapshot(MavenPublication) {
+            from components.java
+            groupId = 'org.soraworld'
+            artifactId = 'gamelobby'
+            version = project.version
+            artifact sourcesJar
+        }
+    }
+}
+
+artifactory {
+    contextUrl = "https://oss.jfrog.org/artifactory"
+    publish {
+        repository {
+            repoKey = "oss-snapshot-local"
+            username = System.getenv('BINTRAY_USER')
+            password = System.getenv('BINTRAY_KEY')
+            maven = true
+        }
+        defaults {
+            publications("mavenSnapshot")
+        }
+    }
 }
