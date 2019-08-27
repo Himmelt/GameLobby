@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.soraworld.lobby.GameLobby;
 
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +72,7 @@ public final class ExampleLobby implements IGameLobby {
     }
 
     public boolean shouldOpen() {
-        return Calendar.getInstance().get(Calendar.HOUR_OF_DAY) == 14;
+        return false;
     }
 
     public boolean shouldStart(long lobbyLife, @NotNull List<Player> players, @NotNull Map<Location, List<Player>> factions) {

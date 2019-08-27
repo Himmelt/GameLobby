@@ -29,5 +29,8 @@ info {
   display = "显示名: %s"
   center = "位  置: %s"
   state = "状  态: %s"
+  gameLife = "游戏时长: %d ticks"
+  lobbyLife = "大厅时长: %d ticks"
+  players = "玩家列表: %s"
   foot = "================================================"
 }

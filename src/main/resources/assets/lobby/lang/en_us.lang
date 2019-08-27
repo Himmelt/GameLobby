@@ -29,5 +29,8 @@ info {
   display = "Display: %s"
   center = "Center: %s"
   state = "State: %s"
+  gameLife = "Game Life: %d ticks"
+  lobbyLife = "Lobby Life: %d ticks"
+  players = "Players List: %s"
   foot = "================================================"
 }

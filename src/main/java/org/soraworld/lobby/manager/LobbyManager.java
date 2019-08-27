@@ -108,7 +108,7 @@ public class LobbyManager extends VManager {
         if (lobby != null) {
             if (lobby.getState() == GameState.START) {
                 lobby.finishGame();
-                sendKey(sender, "finishGame", lobby.display());
+                sendKey(sender, "forceFinish", lobby.display());
             } else sendKey(sender, "gameNotStart", lobby.display());
         } else {
             sendKey(sender, "gameNotExist", name);
@@ -189,12 +189,18 @@ public class LobbyManager extends VManager {
     public void showInfo(@NotNull CommandSender sender, @NotNull String game) {
         IGameLobby lobby = registerLobbies.get(game);
         if (lobby != null) {
+            LobbyData data = getLobbyData(lobby);
             Location center = lobby.getCenter();
             String text = "[" + center.getWorld().getName() + "," + center.getBlockX() + "," + center.getBlockY() + "," + center.getBlockZ() + "]";
             sendKey(sender, "info.head");
             sendKey(sender, "info.display", lobby.display());
             sendKey(sender, "info.center", text);
-            sendKey(sender, "info.state", lobby.getState().toString());
+            sendKey(sender, "info.state", data.state.toString());
+            sendKey(sender, "info.gameLife", data.gameLife);
+            sendKey(sender, "info.lobbyLife", data.lobbyLife);
+            StringJoiner joiner = new StringJoiner(",");
+            data.players.forEach(p -> joiner.add(p.getName()));
+            sendKey(sender, "info.players", joiner.toString());
             sendKey(sender, "info.foot");
         }
     }
