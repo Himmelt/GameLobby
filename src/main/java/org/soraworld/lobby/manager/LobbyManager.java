@@ -190,7 +190,7 @@ public class LobbyManager extends VManager {
         IGameLobby lobby = registerLobbies.get(game);
         if (lobby != null) {
             Location center = lobby.getCenter();
-            String text = "{" + center.getWorld().getName() + "," + center.getBlockX() + "," + center.getBlockY() + "," + center.getBlockZ() + "}";
+            String text = "[" + center.getWorld().getName() + "," + center.getBlockX() + "," + center.getBlockY() + "," + center.getBlockZ() + "]";
             sendKey(sender, "info.head");
             sendKey(sender, "info.display", lobby.display());
             sendKey(sender, "info.center", text);

@@ -69,10 +69,18 @@ public interface IGameLobby {
     @NotNull Map<Location, Location> getTransfer();
 
     /**
-     * 是否开启大厅.
+     * 检查大厅开启的准备条件。
+     * 自动开启与命令开启都会检查。
+     *
+     * @return 是否准备就绪 boolean
+     */
+    boolean checkPrepare();
+
+    /**
+     * 是否开启大厅。
      * 这里可以根据游戏时间，或系统时间，定时或周期性开启。
      * 比如每天晚上 8 点开启。
-     * 游戏必须处于 {@link GameState#CLOSE} 或 {@link GameState#FINISH} 状态.
+     * 游戏必须处于 {@link GameState#CLOSE} 或 {@link GameState#FINISH} 状态。
      *
      * @return 是否开启大厅 boolean
      */
@@ -174,21 +182,43 @@ public interface IGameLobby {
     void onPlayerDeath(@NotNull Player player);
 
     /**
+     * 向 执行者 发送消息.
+     *
+     * @param sender  执行者
+     * @param message 消息
+     */
+    void send(CommandSender sender, String message);
+
+    /**
+     * 向 执行者 发送消息键.
+     *
+     * @param sender 执行者
+     * @param key    键
+     * @param args   参数
+     */
+    void sendKey(CommandSender sender, String key, Object... args);
+
+    /**
      * 开启游戏大厅.
      *
-     * @param sender the sender
+     * @param sender 命令执行者
      */
     default void openLobby(@Nullable CommandSender sender) {
-        LobbyData data = GameLobby.getLobbyManager().getLobbyData(this);
-        if (data.state.canOpen()) {
-            Bukkit.getPluginManager().callEvent(new LobbyOpenEvent(this));
-            onOpen();
-            data.lobbyLife = 0;
-            data.gameLife = 0;
-            data.state = GameState.OPEN;
-            if (sender != null) GameLobby.getLobbyManager().sendKey(sender, "openLobby", display());
-        } else if (sender != null) {
-            GameLobby.getLobbyManager().sendKey(sender, "cantOpenLobby", display(), data.state);
+        if (checkPrepare()) {
+            LobbyData data = GameLobby.getLobbyManager().getLobbyData(this);
+            if (data.state.canOpen()) {
+                Bukkit.getPluginManager().callEvent(new LobbyOpenEvent(this));
+                onOpen();
+                data.lobbyLife = 0;
+                data.gameLife = 0;
+                data.state = GameState.OPEN;
+                if (sender != null) GameLobby.getLobbyManager().sendKey(sender, "openLobby", display());
+            } else if (sender != null) {
+                GameLobby.getLobbyManager().sendKey(sender, "cantOpenLobby", display(), data.state);
+            }
+        } else {
+            if (sender != null) GameLobby.getLobbyManager().sendKey(sender, "notPrepare", display());
+            else GameLobby.getLobbyManager().consoleKey("notPrepare", display());
         }
     }
 
@@ -381,7 +411,7 @@ public interface IGameLobby {
      */
     default void gameBroadcast(@NotNull String message) {
         LobbyData data = GameLobby.getLobbyManager().getLobbyData(this);
-        data.players.forEach(player -> GameLobby.getLobbyManager().send(player, message));
+        data.players.forEach(player -> send(player, message));
     }
 
     /**
@@ -392,7 +422,7 @@ public interface IGameLobby {
      */
     default void gameBroadcastKey(@NotNull String key, Object... args) {
         LobbyData data = GameLobby.getLobbyManager().getLobbyData(this);
-        data.players.forEach(player -> GameLobby.getLobbyManager().sendKey(player, key, args));
+        data.players.forEach(player -> sendKey(player, key, args));
     }
 
     /**
@@ -400,7 +430,7 @@ public interface IGameLobby {
      *
      * @param locations 位置集合
      * @param source    源
-     * @return 最近的位置
+     * @return 最近的位置 nearest loc
      */
     static Location getNearestLoc(@NotNull Collection<Location> locations, @NotNull Location source) {
         double min = Double.MAX_VALUE;

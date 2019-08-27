@@ -2,9 +2,11 @@ package org.soraworld.lobby.core;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.soraworld.lobby.GameLobby;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -65,6 +67,11 @@ public final class ExampleLobby implements IGameLobby {
         return transfer;
     }
 
+    @Override
+    public boolean checkPrepare() {
+        return true;
+    }
+
     public boolean shouldOpen() {
         return Calendar.getInstance().get(Calendar.HOUR_OF_DAY) == 14;
     }
@@ -116,5 +123,15 @@ public final class ExampleLobby implements IGameLobby {
 
     public void onPlayerDeath(@NotNull Player player) {
         kickPlayer(player);
+    }
+
+    @Override
+    public void send(CommandSender sender, String message) {
+        GameLobby.getLobbyManager().send(sender, message);
+    }
+
+    @Override
+    public void sendKey(CommandSender sender, String key, Object... args) {
+        GameLobby.getLobbyManager().sendKey(sender, key, args);
     }
 }
