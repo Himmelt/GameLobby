@@ -125,6 +125,11 @@ public final class ExampleLobby implements IGameLobby {
     }
 
     @Override
+    public @Nullable List<String> extraInfo() {
+        return null;
+    }
+
+    @Override
     public void send(CommandSender sender, String message) {
         GameLobby.getLobbyManager().send(sender, message);
     }

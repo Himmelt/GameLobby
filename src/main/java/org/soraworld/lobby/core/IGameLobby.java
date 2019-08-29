@@ -21,7 +21,8 @@ public interface IGameLobby {
      *
      * @return id string
      */
-    @NotNull String id();
+    @NotNull
+    String id();
 
     /**
      * 计划任务执行周期.
@@ -35,7 +36,8 @@ public interface IGameLobby {
      *
      * @return 显示名 string
      */
-    @NotNull String display();
+    @NotNull
+    String display();
 
     /**
      * 获取游戏大厅的中心位置.
@@ -56,7 +58,8 @@ public interface IGameLobby {
      *
      * @return 大厅半径类型 r type
      */
-    @NotNull RType getRType();
+    @NotNull
+    RType getRType();
 
     /**
      * 获取传送映射信息.
@@ -66,7 +69,8 @@ public interface IGameLobby {
      *
      * @return 传送映射信息 transfer
      */
-    @NotNull Map<Location, Location> getTransfer();
+    @NotNull
+    Map<Location, Location> getTransfer();
 
     /**
      * 检查大厅开启的准备条件。
@@ -135,7 +139,8 @@ public interface IGameLobby {
      * @param origin 原始传送位置
      * @return 最终传送位置 location
      */
-    @Nullable Location onPlayerStart(@NotNull Player player, @NotNull Location origin);
+    @Nullable
+    Location onPlayerStart(@NotNull Player player, @NotNull Location origin);
 
     /**
      * 当玩家主动退出时.
@@ -180,6 +185,14 @@ public interface IGameLobby {
      * @param player 玩家
      */
     void onPlayerDeath(@NotNull Player player);
+
+    /**
+     * 额外信息，执行 info 指令时输出.
+     *
+     * @return 额外信息列表
+     */
+    @Nullable
+    List<String> extraInfo();
 
     /**
      * 向 执行者 发送消息.
@@ -287,12 +300,10 @@ public interface IGameLobby {
         LobbyData data = GameLobby.getLobbyManager().getLobbyData(this);
         Bukkit.getPluginManager().callEvent(new LobbyFinishEvent(this));
         onFinish();
-        data.players.forEach(player -> {
-            // GameLobby.getLobbyManager().clearGame(player);
-            tpPlayerToLobby(player);
-        });
-//        data.players.clear();
-//        data.factions.clear();
+        // GameLobby.getLobbyManager().clearGame(player);
+        data.players.forEach(this::tpPlayerToLobby);
+        // data.players.clear();
+        // data.factions.clear();
         data.state = GameState.FINISH;
     }
 

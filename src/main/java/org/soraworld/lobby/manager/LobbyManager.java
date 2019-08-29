@@ -202,6 +202,8 @@ public class LobbyManager extends VManager {
             StringJoiner joiner = new StringJoiner(",");
             data.players.forEach(p -> joiner.add(p.getName()));
             sendKey(sender, "info.players", joiner.toString());
+            List<String> extras = lobby.extraInfo();
+            if (extras != null) extras.forEach(line -> send(sender, line));
             sendKey(sender, "info.foot");
         }
     }
