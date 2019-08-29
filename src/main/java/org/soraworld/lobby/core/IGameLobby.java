@@ -287,13 +287,12 @@ public interface IGameLobby {
         LobbyData data = GameLobby.getLobbyManager().getLobbyData(this);
         Bukkit.getPluginManager().callEvent(new LobbyFinishEvent(this));
         onFinish();
-        Location center = getCenter();
-        if (center != null) data.players.forEach(player -> {
-            GameLobby.getLobbyManager().clearGame(player);
-            player.teleport(center);
+        data.players.forEach(player -> {
+            // GameLobby.getLobbyManager().clearGame(player);
+            tpPlayerToLobby(player);
         });
-        data.players.clear();
-        data.factions.clear();
+//        data.players.clear();
+//        data.factions.clear();
         data.state = GameState.FINISH;
     }
 
@@ -441,7 +440,12 @@ public interface IGameLobby {
      */
     default void tpPlayerToLobby(@NotNull Player player) {
         Location center = getCenter();
-        if (center != null) player.teleport(center);
+        if (center != null) {
+            center = center.clone();
+            center.setPitch(player.getLocation().getPitch());
+            center.setYaw(player.getLocation().getYaw());
+            player.teleport(center);
+        }
     }
 
     /**
