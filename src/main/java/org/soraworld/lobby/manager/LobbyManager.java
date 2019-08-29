@@ -130,7 +130,12 @@ public class LobbyManager extends VManager {
                     if (lobby.onPlayerJoin(player)) {
                         playerGames.put(uuid, game);
                         Location center = lobby.getCenter();
-                        if (center != null) player.teleport(center);
+                        if (center != null && !lobby.inLobbyRange(player)) {
+                            center = center.clone();
+                            center.setPitch(player.getLocation().getPitch());
+                            center.setYaw(player.getLocation().getYaw());
+                            player.teleport(center);
+                        }
                     } else sendKey(player, "gameRejectJoin", lobby.display());
                     break;
                 case START:

@@ -355,6 +355,46 @@ public interface IGameLobby {
         });
     }
 
+    default boolean inLobbyRange(@NotNull Player player) {
+        Location center = getCenter();
+        if (center != null) {
+            int radius = getRadius();
+            double cX = center.getX(), cY = center.getY(), cZ = center.getZ();
+            Location pLoc = player.getLocation();
+            double pX = pLoc.getX(), pY = pLoc.getY(), pZ = pLoc.getZ();
+            switch (getRType()) {
+                case CUBE: {
+                    double minX = cX - radius, minY = cY - radius, minZ = cZ - radius;
+                    double maxX = cX + radius, maxY = cY + radius, maxZ = cZ + radius;
+                    if (pX >= minX && pX <= maxX && pY >= minY && pY <= maxY && pZ >= minZ && pZ <= maxZ) {
+                        return true;
+                    }
+                    break;
+                }
+                case CUBOID_COLUMN: {
+                    double minX = cX - radius, minZ = cZ - radius;
+                    double maxX = cX + radius, maxZ = cZ + radius;
+                    if (pX >= minX && pX <= maxX && pZ >= minZ && pZ <= maxZ) {
+                        return true;
+                    }
+                    break;
+                }
+                case SPHERE: {
+                    if ((cX - pX) * (cX - pX) + (cY - pY) * (cY - pY) + (cZ - pZ) * (cZ - pZ) <= radius * radius) {
+                        return true;
+                    }
+                    break;
+                }
+                case CIRCLE_COLUMN: {
+                    if ((cX - pX) * (cX - pX) + (cZ - pZ) * (cZ - pZ) <= radius * radius) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * 获取游戏大厅状态.
      *
