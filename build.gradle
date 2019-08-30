@@ -18,7 +18,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.artifactory'
 
 group = 'org.soraworld'
-version = '1.2.2-SNAPSHOT'
+version = '1.2.3'
 
 sourceCompatibility = targetCompatibility = 1.8
 
@@ -32,6 +32,14 @@ repositories {
 dependencies {
     compile 'org.soraworld:violet-spigot:2.4.2-SNAPSHOT'
     compileOnly 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
+}
+
+processResources {
+    inputs.property "version", project.version
+    from(sourceSets.main.resources.srcDirs) {
+        include 'plugin.yml'
+        expand 'version': project.version
+    }
 }
 
 tasks.withType(JavaCompile) {
@@ -76,7 +84,7 @@ publishing {
             from components.java
             groupId = 'org.soraworld'
             artifactId = 'gamelobby'
-            version = project.version
+            version = project.version + '-SNAPSHOT'
             artifact sourcesJar
         }
     }

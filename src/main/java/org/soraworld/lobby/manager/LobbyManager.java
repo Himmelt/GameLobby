@@ -192,7 +192,10 @@ public class LobbyManager extends VManager {
         if (lobby != null) {
             LobbyData data = getLobbyData(lobby);
             Location center = lobby.getCenter();
-            String text = "[" + center.getWorld().getName() + "," + center.getBlockX() + "," + center.getBlockY() + "," + center.getBlockZ() + "]";
+            String text = "[Invalid Config]";
+            if (center != null) {
+                text = "[" + center.getWorld().getName() + "," + center.getBlockX() + "," + center.getBlockY() + "," + center.getBlockZ() + "]";
+            }
             sendKey(sender, "info.head");
             sendKey(sender, "info.display", lobby.display());
             sendKey(sender, "info.center", text);

@@ -21,8 +21,7 @@ gameRejectJoin = "游戏大厅 %s 拒绝你的加入."
 quitGame = "你已退出 %s 游戏."
 gameRejectQuit = "游戏大厅 %s 拒绝你退出游戏."
 notJoinAnyGame = "你尚未加入任何游戏大厅."
-
-comment.updateFrequency = "大厅检测频率(单位: tick)"
+notPrepare = "游戏大厅 %s 尚未准备就绪. 请检查相关配置."
 
 info {
   head = "================= 游戏大厅信息 ================="

@@ -1,5 +1,5 @@
 name: GameLobby
-version: 1.2.2
+version: ${version}
 author: Himmelt
 main: org.soraworld.lobby.GameLobby
 depend: [Violet]

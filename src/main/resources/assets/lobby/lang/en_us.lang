@@ -21,8 +21,7 @@ gameRejectJoin = "Lobby %s reject you to join."
 quitGame = "You quit %s game."
 gameRejectQuit = "Lobby %s reject you quit game."
 notJoinAnyGame = "You are not in any game."
-
-comment.updateFrequency = "Lobby check frequency(tick)"
+notPrepare = "Lobby %s is not ready. Please check it's config."
 
 info {
   head = "================= Game Lobby Info ================="
